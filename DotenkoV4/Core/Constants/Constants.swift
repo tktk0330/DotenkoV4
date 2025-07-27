@@ -191,6 +191,7 @@ extension UIDevice {
     /// 画面サイズが小さいかどうかを判定
     static var isSmallScreen: Bool {
         guard isPhone else { return false }
-        return UIScreen.main.bounds.height < 667 // iPhone SE サイズ以下
+        // Use size classes or dynamic type for more robust detection
+        return UIScreen.main.bounds.height < 736 && UIScreen.main.bounds.width < 414
     }
 }
