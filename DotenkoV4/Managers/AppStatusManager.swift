@@ -67,10 +67,17 @@ class AppStatusManager: ObservableObject {
         
         do {
             // Firestoreからapp_status_master->app_statusドキュメント取得
-            let document = try await db
-                .collection("app_status_master")
-                .document("app_status")
-                .getDocument()
+// Extract Firestore paths into a private constant enum
+private enum FirestoreConstants {
+    static let appStatusCollection = "app_status_master"
+    static let appStatusDocument   = "app_status"
+}
+
+// Then update the fetch call:
+let document = try await db
+    .collection(FirestoreConstants.appStatusCollection)
+    .document(FirestoreConstants.appStatusDocument)
+    .getDocument()
             
             if document.exists {
                 print("📄 アプリステータスドキュメント取得成功")
