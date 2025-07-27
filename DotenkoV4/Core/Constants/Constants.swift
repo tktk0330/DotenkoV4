@@ -65,9 +65,15 @@ struct AppConstants {
     
     // MARK: - AdMob関連
     struct AdMob {
-        static let bannerAdUnitID = "ca-app-pub-3940256099942544/2934735716" // テスト用ID
-        static let interstitialAdUnitID = "ca-app-pub-3940256099942544/4411468910" // テスト用ID
-        static let rewardedAdUnitID = "ca-app-pub-3940256099942544/1712485313" // テスト用ID
+        #if DEBUG
+        static let bannerAdUnitID = "ca-app-pub-3940256099942544/2934735716"
+        static let interstitialAdUnitID = "ca-app-pub-3940256099942544/4411468910"
+        static let rewardedAdUnitID = "ca-app-pub-3940256099942544/1712485313"
+        #else
+        static let bannerAdUnitID = "YOUR_PRODUCTION_BANNER_ID"
+        static let interstitialAdUnitID = "YOUR_PRODUCTION_INTERSTITIAL_ID"
+        static let rewardedAdUnitID = "YOUR_PRODUCTION_REWARDED_ID"
+        #endif
     }
     
     // MARK: - 文字列リソース
