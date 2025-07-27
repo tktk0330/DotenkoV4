@@ -81,18 +81,6 @@ struct ProfileSaveButton: View {
                             .blendMode(.overlay)
                     )
             )
-            .shadow(
-                color: isDisabled ? Color.black.opacity(0.3) : AppColors.brightYellow.opacity(0.6),
-                radius: isDisabled ? 4 : 12,
-                x: 0,
-                y: isDisabled ? 2 : 6
-            )
-            .shadow(
-                color: isDisabled ? Color.clear : AppColors.vibrantOrange.opacity(0.4),
-                radius: isDisabled ? 0 : 20,
-                x: 0,
-                y: isDisabled ? 0 : 8
-            )
         }
         .disabled(isDisabled)
         .scaleEffect(isDisabled ? 0.96 : 1.02)

@@ -14,23 +14,6 @@ struct IconPreview: View {
     
     var body: some View {
         ZStack {
-            // グロー効果（アニメーション付き）
-            RoundedRectangle(cornerRadius: 16)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            AppColors.brightYellow.opacity(0.4),
-                            AppColors.vibrantOrange.opacity(0.2),
-                            Color.clear
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(width: 85, height: 85)
-                .blur(radius: 6)
-                .scaleEffect(isUsingCustomImage ? 1.1 : 1.0)
-                .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: isUsingCustomImage)
             
             // メインフレーム（グラデーション強化）
             RoundedRectangle(cornerRadius: 14)

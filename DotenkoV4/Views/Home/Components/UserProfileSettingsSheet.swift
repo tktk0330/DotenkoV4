@@ -65,6 +65,10 @@ struct UserProfileSettingsSheet: View {
                         // 名前編集セクション
                         ProfileNameEditor(editingName: $editingName)
                         
+                        // スペーサー
+                        Spacer()
+                            .frame(height: 20)
+                        
                         // 保存ボタン
                         ProfileSaveButton(
                             isDisabled: editingName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isUpdating,

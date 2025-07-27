@@ -19,16 +19,17 @@ struct ProfileSettingsHeader: View {
                 Button {
                     onDismiss()
                 } label: {
-                    Text("❌")
-                        .font(.system(size: 16))
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(AppColors.cardWhite)
                 }
+                .padding(.leading, 8)
                 
                 Spacer()
                 
                 // タイトル（中央）
                 Text("プロフィール設定")
-                    .font(AppFonts.gothicHeadline(22))
+                    .font(AppFonts.gothicHeadline(26))
                     .fontWeight(.bold)
                     .foregroundStyle(
                         LinearGradient(

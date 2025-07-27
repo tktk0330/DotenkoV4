@@ -38,13 +38,11 @@ struct IconSelectionSection: View {
                     selectedImage: selectedImage,
                     isUsingCustomImage: isUsingCustomImage
                 )
-                .shadow(color: AppColors.brightYellow.opacity(0.3), radius: 12, x: 0, y: 6)
                 
                 CustomImageButton(
                     selectedPhoto: $selectedPhoto,
                     isUsingCustomImage: isUsingCustomImage
                 )
-                .shadow(color: Color.black.opacity(0.25), radius: 8, x: 0, y: 4)
             }
             
             // 定型アイコングリッド（コンパクト）
