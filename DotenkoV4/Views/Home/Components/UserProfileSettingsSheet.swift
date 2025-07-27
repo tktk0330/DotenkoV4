@@ -25,43 +25,44 @@ struct UserProfileSettingsSheet: View {
     @State private var errorMessage: String = ""
     @State private var isUsingCustomImage: Bool = false
     
-    // 利用可能なアイコンリスト
+    // 利用可能なアイコンリスト（8個に厳選）
     private let availableIcons = [
         "person.fill",
-        "person.crop.circle.fill", 
-        "gamecontroller.fill",
         "crown.fill",
         "star.fill",
-        "heart.fill",
-        "diamond.fill",
+        "gamecontroller.fill",
         "suit.heart.fill",
         "suit.diamond.fill",
-        "suit.club.fill",
         "suit.spade.fill",
         "flame.fill"
     ]
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 24) {
-                // ヘッダー
-                headerView
+            ZStack {
+                // 背景グラデーション
+                AppGradients.primaryBackground
+                    .ignoresSafeArea()
                 
-                // アイコン選択セクション
-                iconSelectionSection
-                
-                // 名前編集セクション
-                nameEditingSection
-                
-                Spacer()
-                
-                // 保存ボタン
-                saveButton
+                VStack(spacing: 16) {
+                    // ヘッダー
+                    headerView
+                    
+                    VStack(spacing: 16) {
+                        // アイコン選択セクション
+                        iconSelectionSection
+                        
+                        // 名前編集セクション
+                        nameEditingSection
+                        
+                        // 保存ボタン
+                        saveButton
+                    }
+                    .padding(.horizontal, 20)
+                }
+                .padding(.top, 16)
+                .padding(.bottom, 20)
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 20)
-            .padding(.bottom, 32)
-            .background(AppColors.primaryBackground)
             .navigationBarHidden(true)
         }
         .onAppear {
@@ -88,29 +89,49 @@ struct UserProfileSettingsSheet: View {
     
     // MARK: - ヘッダー
     private var headerView: some View {
-        HStack {
-            Button("キャンセル") {
-                dismiss()
-            }
-            .font(AppFonts.gothicBody(16))
-            .foregroundColor(AppColors.cardWhite)
-            
-            Spacer()
-            
-            Text("プロフィール設定")
-                .font(AppFonts.gothicHeadline(20))
-                .foregroundColor(AppColors.cardWhite)
-            
-            Spacer()
-            
-            if isUpdating {
-                ProgressView()
-                    .scaleEffect(0.8)
-                    .tint(AppColors.brightYellow)
-            } else {
-                // 空のスペース
-                Text("")
-                    .frame(width: 60)
+        VStack(spacing: 0) {
+            // ナビゲーションバー
+            HStack {
+                // 閉じるボタン
+                Button {
+                    dismiss()
+                } label: {
+                    Text("❌")
+                        .font(.system(size: 16))
+                        .foregroundColor(AppColors.cardWhite)
+                }
+                
+                Spacer()
+                
+                // タイトル（中央）
+                Text("プロフィール設定")
+                    .font(AppFonts.gothicHeadline(22))
+                    .fontWeight(.bold)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [AppColors.brightYellow, AppColors.vibrantOrange],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                
+                Spacer()
+                
+                // 保存状態表示
+                if isUpdating {
+                    HStack(spacing: 6) {
+                        ProgressView()
+                            .scaleEffect(0.7)
+                            .tint(AppColors.brightYellow)
+                        Text("保存中")
+                            .font(AppFonts.gothicCaption(10))
+                            .foregroundColor(AppColors.brightYellow)
+                    }
+                } else {
+                    // スペーサー（バランス用）
+                    Text("")
+                        .frame(width: 32)
+                }
             }
         }
     }
@@ -118,57 +139,133 @@ struct UserProfileSettingsSheet: View {
     // MARK: - アイコン選択セクション
     private var iconSelectionSection: some View {
         VStack(spacing: 16) {
-            // 現在選択中のアイコンプレビュー
-            currentIconPreview
+            // セクションタイトル
+            HStack {
+                Image(systemName: "person.crop.circle.badge.plus")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(AppColors.brightYellow)
+                
+                Text("アイコンを選択")
+                    .font(AppFonts.gothicHeadline(18))
+                    .foregroundColor(AppColors.cardWhite)
+                
+                Spacer()
+            }
             
-            Text("アイコンを選択")
-                .font(AppFonts.gothicHeadline(18))
-                .foregroundColor(AppColors.cardWhite)
+            // プレビューとカスタムボタン
+            HStack(spacing: 20) {
+                currentIconPreview
+                    .shadow(color: AppColors.brightYellow.opacity(0.3), radius: 12, x: 0, y: 6)
+                
+                photoLibraryButton
+                    .shadow(color: Color.black.opacity(0.25), radius: 8, x: 0, y: 4)
+            }
             
-            // フォトライブラリボタン
-            photoLibraryButton
-            
-            Text("または定型アイコンから選択")
-                .font(AppFonts.gothicCaption(14))
-                .foregroundColor(AppColors.cardWhite.opacity(0.7))
-            
-            // アイコングリッド
-            iconGrid
+            // 定型アイコングリッド（コンパクト）
+            VStack(spacing: 8) {
+                Text("定型アイコン")
+                    .font(AppFonts.gothicCaption(12))
+                    .foregroundColor(AppColors.cardWhite.opacity(0.8))
+                
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 12) {
+                    ForEach(availableIcons, id: \.self) { iconName in
+                        iconButton(iconName: iconName)
+                    }
+                }
+            }
         }
-    }
-    
-    // MARK: - 現在のアイコンプレビュー
-    private var currentIconPreview: some View {
-        ZStack {
-            // 外側のグロー効果
-            RoundedRectangle(cornerRadius: 20)
-                .fill(AppColors.brightYellow.opacity(0.2))
-                .frame(width: 110, height: 110)
-                .blur(radius: 6)
-            
-            // メインフレーム
+        .padding(18)
+        .background(
             RoundedRectangle(cornerRadius: 18)
                 .fill(
                     LinearGradient(
                         colors: [
-                            Color.black.opacity(0.6),
-                            Color.black.opacity(0.3)
+                            Color.black.opacity(0.2),
+                            Color.black.opacity(0.1),
+                            Color.black.opacity(0.15)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
-                .frame(width: 96, height: 96)
                 .overlay(
                     RoundedRectangle(cornerRadius: 18)
                         .stroke(
                             LinearGradient(
-                                colors: [AppColors.brightYellow, AppColors.vibrantOrange],
+                                colors: [AppColors.cardWhite.opacity(0.2), AppColors.cardWhite.opacity(0.05)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
-                            lineWidth: 2
+                            lineWidth: 1
                         )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(
+                            Color.white.opacity(0.1),
+                            lineWidth: 0.5
+                        )
+                        .blendMode(.overlay)
+                )
+                .shadow(color: Color.black.opacity(0.3), radius: 12, x: 0, y: 6)
+        )
+    }
+    
+    // MARK: - 現在のアイコンプレビュー
+    private var currentIconPreview: some View {
+        ZStack {
+            // グロー効果（アニメーション付き）
+            RoundedRectangle(cornerRadius: 16)
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            AppColors.brightYellow.opacity(0.4),
+                            AppColors.vibrantOrange.opacity(0.2),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: 10,
+                        endRadius: 50
+                    )
+                )
+                .frame(width: 85, height: 85)
+                .blur(radius: 6)
+                .scaleEffect(isUsingCustomImage ? 1.1 : 1.0)
+                .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: isUsingCustomImage)
+            
+            // メインフレーム（グラデーション強化）
+            RoundedRectangle(cornerRadius: 14)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.black.opacity(0.8),
+                            Color.black.opacity(0.4),
+                            Color.black.opacity(0.6)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 70, height: 70)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(
+                            LinearGradient(
+                                colors: [AppColors.brightYellow, AppColors.vibrantOrange, AppColors.brightYellow],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2.5
+                        )
+                        .shadow(color: AppColors.brightYellow.opacity(0.6), radius: 4, x: 0, y: 0)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(
+                            Color.white.opacity(0.3),
+                            lineWidth: 0.5
+                        )
+                        .blendMode(.overlay)
                 )
             
             // 選択中のアイコン
@@ -177,13 +274,13 @@ struct UserProfileSettingsSheet: View {
                     Image(uiImage: selectedImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: 96, height: 96)
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                        .frame(width: 70, height: 70)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                 } else if isUsingCustomImage {
                     // カスタム画像選択中だが、まだ読み込み中
                     ZStack {
                         Image(systemName: selectedIconName)
-                            .font(.system(size: 40, weight: .medium))
+                            .font(.system(size: 28, weight: .medium))
                             .foregroundStyle(
                                 LinearGradient(
                                     colors: [AppColors.cardWhite.opacity(0.5), AppColors.cardWhite.opacity(0.3)],
@@ -210,7 +307,7 @@ struct UserProfileSettingsSheet: View {
                     }
                 } else {
                     Image(systemName: selectedIconName)
-                        .font(.system(size: 40, weight: .medium))
+                        .font(.system(size: 28, weight: .medium))
                         .foregroundStyle(
                             LinearGradient(
                                 colors: [AppColors.cardWhite, AppColors.cardWhite.opacity(0.7)],
@@ -226,36 +323,90 @@ struct UserProfileSettingsSheet: View {
     // MARK: - フォトライブラリボタン
     private var photoLibraryButton: some View {
         PhotosPicker(selection: $selectedPhoto, matching: .images) {
-            HStack(spacing: 12) {
-                Image(systemName: "photo.on.rectangle")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(AppColors.brightYellow)
+            VStack(spacing: 6) {
+                // アイコン（シンプルデザイン）
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    AppColors.brightYellow.opacity(0.2),
+                                    AppColors.vibrantOrange.opacity(0.1)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [AppColors.brightYellow.opacity(0.6), AppColors.vibrantOrange.opacity(0.4)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1
+                                )
+                        )
+                    
+                    Image(systemName: "photo.badge.plus.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [AppColors.brightYellow, AppColors.vibrantOrange],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
                 
-                Text("フォトライブラリから選択")
-                    .font(AppFonts.gothicBody(16))
-                    .foregroundColor(AppColors.cardWhite)
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(AppColors.cardWhite.opacity(0.6))
+                // テキスト（シンプル）
+                VStack(spacing: 1) {
+                    Text("カスタム")
+                        .font(AppFonts.gothicCaption(10))
+                        .foregroundColor(AppColors.cardWhite)
+                    
+                    Text("追加")
+                        .font(AppFonts.gothicCaption(9))
+                        .foregroundColor(AppColors.cardWhite.opacity(0.7))
+                }
             }
-            .padding(16)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 10)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.black.opacity(0.3))
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.black.opacity(0.3),
+                                Color.black.opacity(0.2)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(
-                                isUsingCustomImage 
-                                    ? AppColors.brightYellow
-                                    : AppColors.cardWhite.opacity(0.3),
-                                lineWidth: isUsingCustomImage ? 2 : 1
+                                isUsingCustomImage
+                                    ? LinearGradient(
+                                        colors: [AppColors.brightYellow, AppColors.vibrantOrange],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                    : LinearGradient(
+                                        colors: [AppColors.cardWhite.opacity(0.3), AppColors.cardWhite.opacity(0.1)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                lineWidth: isUsingCustomImage ? 1.5 : 1
                             )
                     )
             )
         }
+        .scaleEffect(isUsingCustomImage ? 1.02 : 1.0)
+        .animation(.easeInOut(duration: 0.2), value: isUsingCustomImage)
         .onChange(of: selectedPhoto) { _, newPhoto in
             Task {
                 if let newPhoto = newPhoto {
@@ -267,100 +418,303 @@ struct UserProfileSettingsSheet: View {
     
     // MARK: - アイコングリッド
     private var iconGrid: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 16) {
-            ForEach(availableIcons, id: \.self) { iconName in
-                iconButton(iconName: iconName)
+        VStack(spacing: 12) {
+            Text("定型アイコンから選択")
+                .font(AppFonts.gothicBody(16))
+                .foregroundColor(AppColors.cardWhite.opacity(0.8))
+            
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 16) {
+                ForEach(availableIcons, id: \.self) { iconName in
+                    iconButton(iconName: iconName)
+                }
             }
+            .padding(.horizontal, 8)
         }
-        .padding(.horizontal, 8)
     }
     
     // MARK: - アイコンボタン
     private func iconButton(iconName: String) -> some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
+        let isSelected = (selectedIconName == iconName && !isUsingCustomImage)
+        
+        return Button {
+            withAnimation(.easeInOut(duration: 0.3)) {
                 selectedIconName = iconName
                 isUsingCustomImage = false
                 selectedImage = nil
             }
         } label: {
             ZStack {
-                RoundedRectangle(cornerRadius: 12)
+                // 背景（アニメーション強化）
+                RoundedRectangle(cornerRadius: 16)
                     .fill(
-                        (selectedIconName == iconName && !isUsingCustomImage)
-                            ? AppColors.brightYellow.opacity(0.3)
-                            : Color.black.opacity(0.3)
-                    )
-                    .frame(width: 60, height: 60)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(
-                                (selectedIconName == iconName && !isUsingCustomImage)
-                                    ? AppColors.brightYellow
-                                    : AppColors.cardWhite.opacity(0.3),
-                                lineWidth: (selectedIconName == iconName && !isUsingCustomImage) ? 2 : 1
+                        isSelected
+                            ? LinearGradient(
+                                colors: [
+                                    AppColors.brightYellow.opacity(0.4),
+                                    AppColors.vibrantOrange.opacity(0.3),
+                                    Color.black.opacity(0.2)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            : LinearGradient(
+                                colors: [
+                                    Color.black.opacity(0.5),
+                                    Color.black.opacity(0.3),
+                                    Color.black.opacity(0.4)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
                             )
                     )
+                    .frame(width: 50, height: 50)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                isSelected
+                                    ? LinearGradient(
+                                        colors: [AppColors.brightYellow, AppColors.vibrantOrange, AppColors.brightYellow],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                    : LinearGradient(
+                                        colors: [AppColors.cardWhite.opacity(0.4), AppColors.cardWhite.opacity(0.2)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                lineWidth: isSelected ? 2.5 : 1
+                            )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                Color.white.opacity(isSelected ? 0.4 : 0.2),
+                                lineWidth: 0.5
+                            )
+                            .blendMode(.overlay)
+                    )
+                    .shadow(
+                        color: isSelected ? AppColors.brightYellow.opacity(0.5) : Color.black.opacity(0.3),
+                        radius: isSelected ? 12 : 6,
+                        x: 0,
+                        y: isSelected ? 4 : 2
+                    )
                 
+                // アイコン（シャドウ付き）
                 Image(systemName: iconName)
-                    .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(
-                        (selectedIconName == iconName && !isUsingCustomImage)
-                            ? AppColors.brightYellow
-                            : AppColors.cardWhite.opacity(0.7)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(
+                        isSelected
+                            ? LinearGradient(
+                                colors: [AppColors.brightYellow, AppColors.vibrantOrange, AppColors.brightYellow],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            : LinearGradient(
+                                colors: [AppColors.cardWhite, AppColors.cardWhite.opacity(0.8)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                    )
+                    .shadow(
+                        color: isSelected ? Color.black.opacity(0.4) : Color.black.opacity(0.2),
+                        radius: isSelected ? 3 : 1,
+                        x: 0,
+                        y: 1
                     )
             }
         }
-        .scaleEffect((selectedIconName == iconName && !isUsingCustomImage) ? 1.1 : 1.0)
-        .animation(.easeInOut(duration: 0.2), value: selectedIconName)
-        .animation(.easeInOut(duration: 0.2), value: isUsingCustomImage)
+        .scaleEffect(isSelected ? 1.08 : 1.0)
+        .rotationEffect(.degrees(isSelected ? 2 : 0))
+        .animation(.interpolatingSpring(stiffness: 400, damping: 12).delay(isSelected ? 0 : 0.1), value: isSelected)
     }
     
     // MARK: - 名前編集セクション
     private var nameEditingSection: some View {
-        VStack(spacing: 12) {
-            Text("ユーザー名")
-                .font(AppFonts.gothicHeadline(18))
-                .foregroundColor(AppColors.cardWhite)
-                .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(spacing: 10) {
+            // セクションタイトル
+            HStack {
+                Image(systemName: "person.badge.key.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(AppColors.brightYellow)
+                
+                Text("ユーザー名")
+                    .font(AppFonts.gothicHeadline(16))
+                    .foregroundColor(AppColors.cardWhite)
+                
+                Spacer()
+            }
             
+            // テキストフィールド（高級グラデーション）
             TextField("ユーザー名を入力", text: $editingName)
                 .font(AppFonts.gothicBody(16))
                 .foregroundColor(AppColors.cardWhite)
-                .padding(16)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 14)
                 .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.black.opacity(0.3))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(AppColors.brightYellow.opacity(0.5), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.black.opacity(0.7),
+                                    Color.black.opacity(0.4),
+                                    Color.black.opacity(0.6)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [AppColors.brightYellow.opacity(0.7), AppColors.vibrantOrange.opacity(0.5), AppColors.brightYellow.opacity(0.3)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 2
+                                )
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(
+                                    Color.white.opacity(0.2),
+                                    lineWidth: 0.5
+                                )
+                                .blendMode(.overlay)
+                        )
+                        .shadow(color: Color.black.opacity(0.4), radius: 8, x: 0, y: 4)
+                        .shadow(color: AppColors.brightYellow.opacity(0.3), radius: 4, x: 0, y: 0)
                 )
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
         }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.black.opacity(0.2),
+                            Color.black.opacity(0.1),
+                            Color.black.opacity(0.15)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            LinearGradient(
+                                colors: [AppColors.cardWhite.opacity(0.2), AppColors.cardWhite.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            Color.white.opacity(0.1),
+                            lineWidth: 0.5
+                        )
+                        .blendMode(.overlay)
+                )
+                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+        )
     }
     
     // MARK: - 保存ボタン
     private var saveButton: some View {
-        Button {
+        let isDisabled = editingName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isUpdating
+        
+        return Button {
             saveProfile()
         } label: {
-            Text(isUpdating ? "保存中..." : "保存")
-                .font(AppFonts.gothicHeadline(18))
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(
-                            editingName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isUpdating
-                                ? AppColors.disabledButton
-                                : AppColors.brightYellow
-                        )
-                )
+            HStack(spacing: 12) {
+                if isUpdating {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                        .tint(.black)
+                }
+                
+                Text(isUpdating ? "保存中..." : "変更を保存")
+                    .font(AppFonts.gothicHeadline(18))
+                    .fontWeight(.bold)
+                    .foregroundColor(.black)
+                
+                if !isUpdating {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.black)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        isDisabled
+                            ? LinearGradient(
+                                colors: [Color.gray.opacity(0.6), Color.gray.opacity(0.4)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            : LinearGradient(
+                                colors: [
+                                    AppColors.brightYellow,
+                                    AppColors.vibrantOrange,
+                                    AppColors.brightYellow.opacity(0.8)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(
+                                isDisabled
+                                    ? LinearGradient(
+                                        colors: [Color.gray.opacity(0.4), Color.gray.opacity(0.4)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                    : LinearGradient(
+                                        colors: [AppColors.brightYellow, AppColors.vibrantOrange, AppColors.brightYellow],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                lineWidth: isDisabled ? 1 : 3
+                            )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(
+                                Color.white.opacity(isDisabled ? 0.1 : 0.4),
+                                lineWidth: 1
+                            )
+                            .blendMode(.overlay)
+                    )
+            )
+            .shadow(
+                color: isDisabled ? Color.black.opacity(0.3) : AppColors.brightYellow.opacity(0.6),
+                radius: isDisabled ? 4 : 12,
+                x: 0,
+                y: isDisabled ? 2 : 6
+            )
+            .shadow(
+                color: isDisabled ? Color.clear : AppColors.vibrantOrange.opacity(0.4),
+                radius: isDisabled ? 0 : 20,
+                x: 0,
+                y: isDisabled ? 0 : 8
+            )
         }
-        .disabled(editingName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isUpdating)
+        .disabled(isDisabled)
+        .scaleEffect(isDisabled ? 0.96 : 1.02)
+        .animation(.interpolatingSpring(stiffness: 400, damping: 18), value: isDisabled)
+        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: !isDisabled)
     }
     
     // MARK: - 初期値設定
