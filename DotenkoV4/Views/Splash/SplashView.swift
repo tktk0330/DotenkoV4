@@ -47,7 +47,7 @@ struct SplashView: View {
     
     // MARK: - メインコンテンツビュー
     private var mainContentView: some View {
-        VStack(spacing: AppConstants.Screen.largePadding) {
+        VStack(spacing: ScreenConstants.largePadding) {
             
             Spacer()
             
@@ -60,9 +60,9 @@ struct SplashView: View {
             progressBarView
             
             Spacer()
-                .frame(height: AppConstants.Screen.bannerHeight + AppConstants.Screen.defaultPadding)
+                .frame(height: ScreenConstants.bannerHeight + ScreenConstants.defaultPadding)
         }
-        .padding(AppConstants.Screen.defaultPadding)
+        .padding(ScreenConstants.defaultPadding)
     }
     
     // MARK: - カード裏面ビュー
@@ -129,7 +129,7 @@ struct SplashView: View {
     private func performInitialization() {
         // 実際の実装では、ここでFirebaseからのデータ取得を行う
         // 現在はシミュレーション
-        DispatchQueue.main.asyncAfter(deadline: .now() + AppConstants.Animation.splashDuration) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationConstants.splashDuration) {
             withAnimation(.easeOut(duration: 0.5)) {
                 isLoading = false
             }

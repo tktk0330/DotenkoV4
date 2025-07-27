@@ -40,7 +40,7 @@ struct HomeView: View {
     
     // MARK: - メインコンテンツビュー
     private var mainContentView: some View {
-        VStack(spacing: AppConstants.Screen.largePadding * 1.5) {
+        VStack(spacing: ScreenConstants.largePadding * 1.5) {
             
             Spacer()
             
@@ -58,7 +58,7 @@ struct HomeView: View {
             
             Spacer()
         }
-        .padding(AppConstants.Screen.defaultPadding)
+        .padding(ScreenConstants.defaultPadding)
     }
     
     // MARK: - タイトルセクション

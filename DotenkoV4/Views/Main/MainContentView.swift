@@ -71,7 +71,7 @@ struct MainContentView: View {
                 // バナー広告背景
                 Rectangle()
                     .fill(AppColors.secondaryBackground)
-                    .frame(height: AppConstants.Screen.bannerHeight)
+                    .frame(height: ScreenConstants.bannerHeight)
                     .border(AppColors.borderColor, width: 1)
                 
                 // バナー広告プレースホルダー

@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 // MARK: - カラーパレット
 struct AppColors {
@@ -148,19 +149,35 @@ struct AppFonts {
     
     // MARK: - エレガントフォント
     static func elegantTitle(_ size: CGFloat) -> Font {
-        return .custom("Didot", size: size).weight(.bold)
+        if UIFont(name: "Didot", size: size) != nil {
+            return .custom("Didot", size: size).weight(.bold)
+        } else {
+            return .system(size: size, weight: .bold, design: .serif)
+        }
     }
     
     static func elegantHeadline(_ size: CGFloat) -> Font {
-        return .custom("Didot", size: size).weight(.semibold)
+        if UIFont(name: "Didot", size: size) != nil {
+            return .custom("Didot", size: size).weight(.semibold)
+        } else {
+            return .system(size: size, weight: .semibold, design: .serif)
+        }
     }
     
     static func elegantBody(_ size: CGFloat) -> Font {
-        return .custom("Avenir Next", size: size).weight(.medium)
+        if UIFont(name: "Avenir Next", size: size) != nil {
+            return .custom("Avenir Next", size: size).weight(.medium)
+        } else {
+            return .system(size: size, weight: .medium, design: .default)
+        }
     }
     
     static func elegantCaption(_ size: CGFloat) -> Font {
-        return .custom("Avenir Next", size: size).weight(.regular)
+        if UIFont(name: "Avenir Next", size: size) != nil {
+            return .custom("Avenir Next", size: size).weight(.regular)
+        } else {
+            return .system(size: size, weight: .regular, design: .default)
+        }
     }
     
     // MARK: - サイズ定義

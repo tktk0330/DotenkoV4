@@ -80,9 +80,9 @@ struct TopView: View {
             startButtonView
             
             Spacer()
-                .frame(height: AppConstants.Screen.bannerHeight + AppConstants.Screen.defaultPadding)
+                .frame(height: ScreenConstants.bannerHeight + ScreenConstants.defaultPadding)
         }
-        .padding(AppConstants.Screen.defaultPadding)
+        .padding(ScreenConstants.defaultPadding)
     }
     
     // MARK: - DOTENKOロゴビュー
@@ -146,8 +146,6 @@ struct TopView: View {
         cardsRotation = []
         cardAnimationOffset = []
         
-        let screenWidth = UIScreen.main.bounds.width
-        let screenHeight = UIScreen.main.bounds.height
         
         // 各カードの位置を竜巻状に配置
         for i in 0..<cardAssets.count {
@@ -163,54 +161,138 @@ struct TopView: View {
         }
     }
     
+    // MARK: - アニメーションタイムライン構造
+    private struct AnimationPhase {
+        let delay: Double
+        let duration: Double
+        let animation: Animation
+        let changes: () -> Void
+        
+        init(delay: Double, duration: Double, animation: Animation, changes: @escaping () -> Void) {
+            self.delay = delay
+            self.duration = duration
+            self.animation = animation
+            self.changes = changes
+        }
+    }
+    
+    // MARK: - アニメーション定数
+    private struct TopViewAnimationTimings {
+        static let logoExpansionDelay: Double = 0.0
+        static let logoExpansionDuration: Double = 0.4
+        static let logoBounceDelay: Double = 0.4
+        static let logoBounceBackDuration: Double = 0.4
+        static let tornadoStartDelay: Double = 0.5
+        static let logoFinalPositionDelay: Double = 0.8
+        static let logoFinalPositionDuration: Double = 0.4
+        static let logoExtraBounceDelay: Double = 1.2
+        static let logoExtraBounceDuration: Double = 0.2
+        static let logoSettleDelay: Double = 1.4
+        static let logoSettleDuration: Double = 0.2
+        static let buttonShowDelay: Double = 1.5
+        static let buttonShowDuration: Double = 0.8
+    }
+    
     // MARK: - アニメーション開始
     private func startTopViewAnimations() {
-        // 派手な動きのアニメーション
-        
-        // フェーズ1: 極小から超巨大へ急拡大（0.4秒）
-        withAnimation(.easeIn(duration: 0.4)) {
-            logoScale = 8.0  // 8倍まで拡大！
-            logoOpacity = 1.0
-            logoRotation = 1080.0  // 3回転
-        }
-        
-        // フェーズ2: 跳ね返り（0.4秒後）
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            withAnimation(.interpolatingSpring(stiffness: 50, damping: 4)) {
-                logoScale = 0.5  // 半分まで縮小
-                logoRotation = -180.0  // 逆回転
-            }
-        }
-        
-        // フェーズ3: 最終位置へ（0.8秒後）
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            withAnimation(.interpolatingSpring(stiffness: 150, damping: 8)) {
+        // アニメーションタイムラインを定義
+        let animationTimeline: [AnimationPhase] = [
+            // フェーズ1: 極小から超巨大へ急拡大
+            AnimationPhase(
+                delay: TopViewAnimationTimings.logoExpansionDelay,
+                duration: TopViewAnimationTimings.logoExpansionDuration,
+                animation: .easeIn(duration: TopViewAnimationTimings.logoExpansionDuration)
+            ) {
+                logoScale = 8.0      // 8倍まで拡大！
+                logoOpacity = 1.0
+                logoRotation = 1080.0 // 3回転
+            },
+            
+            // フェーズ2: 跳ね返り
+            AnimationPhase(
+                delay: TopViewAnimationTimings.logoBounceDelay,
+                duration: TopViewAnimationTimings.logoBounceBackDuration,
+                animation: .interpolatingSpring(stiffness: 50, damping: 4)
+            ) {
+                logoScale = 0.5       // 半分まで縮小
+                logoRotation = -180.0 // 逆回転
+            },
+            
+            // フェーズ3: 竜巻アニメーション開始
+            AnimationPhase(
+                delay: TopViewAnimationTimings.tornadoStartDelay,
+                duration: 0.0,
+                animation: .linear(duration: 0.0)
+            ) {
+                startTornadoAnimation()
+            },
+            
+            // フェーズ4: 最終位置へ
+            AnimationPhase(
+                delay: TopViewAnimationTimings.logoFinalPositionDelay,
+                duration: TopViewAnimationTimings.logoFinalPositionDuration,
+                animation: .interpolatingSpring(stiffness: 150, damping: 8)
+            ) {
                 logoScale = 1.0
                 logoRotation = 0.0
-            }
-        }
-        
-        // フェーズ4: 追加のバウンス（1.2秒後）
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            withAnimation(.interpolatingSpring(stiffness: 300, damping: 10)) {
-                logoScale = 1.3
-            }
+            },
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                withAnimation(.interpolatingSpring(stiffness: 400, damping: 12)) {
-                    logoScale = 1.0
+            // フェーズ5: 追加のバウンス（拡大）
+            AnimationPhase(
+                delay: TopViewAnimationTimings.logoExtraBounceDelay,
+                duration: TopViewAnimationTimings.logoExtraBounceDuration,
+                animation: .interpolatingSpring(stiffness: 300, damping: 10)
+            ) {
+                logoScale = 1.3
+            },
+            
+            // フェーズ6: 追加のバウンス（収束）
+            AnimationPhase(
+                delay: TopViewAnimationTimings.logoSettleDelay,
+                duration: TopViewAnimationTimings.logoSettleDuration,
+                animation: .interpolatingSpring(stiffness: 400, damping: 12)
+            ) {
+                logoScale = 1.0
+            },
+            
+            // フェーズ7: ボタン表示
+            AnimationPhase(
+                delay: TopViewAnimationTimings.buttonShowDelay,
+                duration: TopViewAnimationTimings.buttonShowDuration,
+                animation: .easeOut(duration: TopViewAnimationTimings.buttonShowDuration)
+            ) {
+                buttonOpacity = 1.0
+            }
+        ]
+        
+        // タイムラインを実行
+        executeAnimationTimeline(animationTimeline)
+    }
+    
+    // MARK: - アニメーションタイムライン実行
+    private func executeAnimationTimeline(_ timeline: [AnimationPhase]) {
+        for phase in timeline {
+            if phase.delay == 0.0 {
+                // 即座に実行
+                if phase.duration > 0.0 {
+                    withAnimation(phase.animation) {
+                        phase.changes()
+                    }
+                } else {
+                    phase.changes()
+                }
+            } else {
+                // 遅延実行
+                DispatchQueue.main.asyncAfter(deadline: .now() + phase.delay) {
+                    if phase.duration > 0.0 {
+                        withAnimation(phase.animation) {
+                            phase.changes()
+                        }
+                    } else {
+                        phase.changes()
+                    }
                 }
             }
-        }
-        
-        // ボタン表示アニメーション（ロゴ登場後）
-        withAnimation(.easeOut(duration: 0.8).delay(1.5)) {
-            buttonOpacity = 1.0
-        }
-        
-        // 竜巻アニメーション開始
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            startTornadoAnimation()
         }
     }
     
