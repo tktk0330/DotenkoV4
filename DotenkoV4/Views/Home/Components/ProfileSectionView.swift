@@ -70,7 +70,7 @@ struct ProfileSectionView: View {
     private var playerNameView: some View {
         HStack(spacing: 8) {
             Text("iphone16pro")
-                .font(.custom("Impact", size: 24))
+                .font(AppFonts.gothicHeadline(24))
                 .fontWeight(.bold)
                 .foregroundColor(AppColors.cardWhite)
             

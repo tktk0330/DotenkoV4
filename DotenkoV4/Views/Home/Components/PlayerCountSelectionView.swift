@@ -32,7 +32,7 @@ struct PlayerCountSelectionView: View {
                 .foregroundStyle(AppGradients.logoGradient)
             
             Text("プレイヤー数")
-                .font(AppFonts.elegantHeadline(18))
+                .font(AppFonts.gothicHeadline(18))
                 .foregroundStyle(AppGradients.logoGradient)
             
             Spacer()
@@ -51,7 +51,7 @@ struct PlayerCountSelectionView: View {
             impactFeedback.impactOccurred()
         }) {
             Text("\(count)")
-                .font(AppFonts.elegantHeadline(22))
+                .font(AppFonts.gothicHeadline(22))
                 .fontWeight(.bold)
                 .foregroundColor(selectedPlayerCount == count ? .black : AppColors.cardWhite)
                 .frame(width: 55, height: 55)

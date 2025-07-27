@@ -115,12 +115,12 @@ struct GameModeSelectionView: View {
     private func textSection(title: String, subtitle: String, iconColor: Color) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
-                .font(AppFonts.elegantHeadline(24))
+                .font(AppFonts.gothicHeadline(24))
                 .fontWeight(.bold)
                 .foregroundColor(iconColor)
             
             Text(subtitle)
-                .font(AppFonts.elegantBody(14))
+                .font(AppFonts.gothicBody(14))
                 .foregroundColor(AppColors.cardWhite.opacity(0.9))
         }
     }

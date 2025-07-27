@@ -93,7 +93,7 @@ struct HomeTabBarView: View {
                 
                 // ラベル
                 Text(tab.rawValue)
-                    .font(AppFonts.elegantCaption(8))
+                    .font(AppFonts.gothicCaption(8))
                     .fontWeight(.medium)
                     .foregroundColor(selectedTab == tab ? AppColors.brightYellow : AppColors.cardWhite.opacity(0.8))
                     .scaleEffect(selectedTab == tab ? 1.02 : 1.0)
