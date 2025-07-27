@@ -16,7 +16,10 @@ struct PlayerCountSelectionView: View {
             
             HStack(spacing: 12) {
                 ForEach(2...5, id: \.self) { count in
-                    playerCountButton(count: count)
+                    PlayerCountButton(
+                        count: count,
+                        selectedPlayerCount: $selectedPlayerCount
+                    )
                 }
             }
         }
@@ -39,50 +42,67 @@ struct PlayerCountSelectionView: View {
         }
     }
     
+}
+
+// MARK: - 個別プレイヤー数ボタンコンポーネント
+struct PlayerCountButton: View {
+    let count: Int
+    @Binding var selectedPlayerCount: Int
+    @State private var isPressed = false
+    @State private var animatedScale: CGFloat = 1.0
     
-    // MARK: - プレイヤー数ボタン
-    private func playerCountButton(count: Int) -> some View {
-        Button(action: {
-            withAnimation(.interpolatingSpring(stiffness: 400, damping: 12)) {
-                selectedPlayerCount = count
-            }
-            // ハプティックフィードバック
-            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-            impactFeedback.impactOccurred()
-        }) {
+    private var isSelected: Bool {
+        selectedPlayerCount == count
+    }
+    
+    var body: some View {
+        Button(action: handleTap) {
             Text("\(count)")
                 .font(AppFonts.gothicHeadline(22))
                 .fontWeight(.bold)
-                .foregroundColor(selectedPlayerCount == count ? .black : AppColors.cardWhite)
+                .foregroundColor(isSelected ? .black : AppColors.cardWhite)
                 .frame(width: 55, height: 55)
-                .background(buttonBackground(isSelected: selectedPlayerCount == count))
-                .scaleEffect(selectedPlayerCount == count ? 1.05 : 1.0)
+                .background(buttonBackground)
+                .scaleEffect(animatedScale)
+                .scaleEffect(isPressed ? 0.95 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
-    }
-    
-    // MARK: - ボタン背景
-    private func buttonBackground(isSelected: Bool) -> some View {
-        ZStack {
-            if isSelected {
-                // 選択時の背景
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(AppGradients.logoGradient)
-                
-                // グロー効果
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(AppColors.brightYellow, lineWidth: 2)
-                    .blur(radius: 4)
-            } else {
-                // 未選択時の背景
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.black.opacity(0.3))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(AppColors.cardWhite.opacity(0.4), lineWidth: 1)
-                    )
+        .onLongPressGesture(minimumDuration: 0, perform: {}) { pressing in
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isPressed = pressing
             }
         }
+        .onChange(of: isSelected, initial: true) { _, newValue in
+            if newValue {
+                withAnimation(.interpolatingSpring(stiffness: 400, damping: 12)) {
+                    animatedScale = 1.05
+                }
+            } else {
+                animatedScale = 1.0
+            }
+        }
+    }
+    
+    private func handleTap() {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        selectedPlayerCount = count
+    }
+    
+    private var buttonBackground: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .fill(isSelected ? 
+                AnyShapeStyle(AppGradients.logoGradient) : 
+                AnyShapeStyle(Color.black.opacity(0.3)))
+            .overlay {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(AppColors.brightYellow, lineWidth: 2)
+                        .blur(radius: 4)
+                } else {
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(AppColors.cardWhite.opacity(0.4), lineWidth: 1)
+                }
+            }
     }
 }
 
