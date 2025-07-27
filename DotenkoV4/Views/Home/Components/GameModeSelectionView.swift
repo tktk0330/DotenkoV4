@@ -7,10 +7,7 @@
 
 import SwiftUI
 
-struct GameModeSelectionView: View {
-    
-    var body: some View {
-// Add this model at the top of the file (below your imports)
+// GameMode model definition
 struct GameMode {
     let title: String
     let subtitle: String
@@ -20,29 +17,23 @@ struct GameMode {
 }
 
 struct GameModeSelectionView: View {
-    // ← New stored property
     let gameModes: [GameMode]
     
-    // ← New initializer with a default configuration
     init(gameModes: [GameMode] = Self.defaultGameModes) {
         self.gameModes = gameModes
     }
     
-    // ← Default, data-driven configuration
     static let defaultGameModes = [
         GameMode(title: "vs CPU", subtitle: "コンピューターと対戦", iconName: "desktopcomputer", iconColor: .blue) {
-            // CPU対戦画面に遷移
             print("CPU対戦を選択")
         },
         GameMode(title: "vs Online", subtitle: "友人とオンライン対戦", iconName: "wifi", iconColor: .green) {
-            // オンライン対戦画面に遷移
             print("オンライン対戦を選択")
         }
     ]
     
     var body: some View {
         VStack(spacing: 16) {
-            // ← Replace the two hard-coded buttons with a ForEach over `gameModes`
             ForEach(gameModes.indices, id: \.self) { index in
                 let mode = gameModes[index]
                 gameModeButton(
