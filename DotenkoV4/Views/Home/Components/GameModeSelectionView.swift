@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct GameModeSelectionView: View {
-    @Binding var isAnimating: Bool
     
     var body: some View {
         VStack(spacing: 16) {
@@ -36,8 +35,6 @@ struct GameModeSelectionView: View {
                 }
             )
         }
-        .scaleEffect(isAnimating ? 1.0 : 0.9)
-        .opacity(isAnimating ? 1.0 : 0.0)
     }
     
     // MARK: - ゲームモードボタン
@@ -63,7 +60,14 @@ struct GameModeSelectionView: View {
                 arrowIcon
             }
             .padding(20)
-            .background(buttonBackground(iconColor: iconColor))
+            .cardBackground(
+                cornerRadius: 18,
+                borderColor: AnyShapeStyle(LinearGradient(
+                    colors: [iconColor.opacity(0.8), iconColor.opacity(0.4)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ))
+            )
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -117,44 +121,10 @@ struct GameModeSelectionView: View {
             .foregroundColor(AppColors.cardWhite.opacity(0.7))
     }
     
-    // MARK: - ボタン背景
-    private func buttonBackground(iconColor: Color) -> some View {
-        ZStack {
-            // 背景グラデーション
-            RoundedRectangle(cornerRadius: 18)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.black.opacity(0.6),
-                            Color.black.opacity(0.3)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-            
-            // 境界線グラデーション
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(
-                    LinearGradient(
-                        colors: [iconColor.opacity(0.8), iconColor.opacity(0.4)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 2
-                )
-            
-            // 微かなグロー効果
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(iconColor.opacity(0.2), lineWidth: 4)
-                .blur(radius: 4)
-        }
-    }
 }
 
 #Preview {
-    @State var isAnimating = true
-    return GameModeSelectionView(isAnimating: $isAnimating)
+    GameModeSelectionView()
         .background(AppGradients.primaryBackground)
         .padding()
 }

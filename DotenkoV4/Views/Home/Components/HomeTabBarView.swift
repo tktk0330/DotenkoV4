@@ -25,7 +25,6 @@ enum HomeTab: String, CaseIterable {
 // MARK: - タブバービュー
 struct HomeTabBarView: View {
     @Binding var selectedTab: HomeTab
-    let onTabSelection: (HomeTab) -> Void
     
     var body: some View {
         HStack(spacing: 12) {
@@ -60,17 +59,15 @@ struct HomeTabBarView: View {
     // MARK: - 高級タブバーボタン
     private func luxuryTabButton(tab: HomeTab) -> some View {
         Button(action: {
+            // 既に選択されているタブの場合は何もしない
+            guard selectedTab != tab else { return }
+            
             // ハプティックフィードバック
             let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
             impactFeedback.impactOccurred()
             
-            // 直接タブを変更
-            withAnimation(.interpolatingSpring(stiffness: 200, damping: 8)) {
-                selectedTab = tab
-            }
-            
-            // タブ選択時の処理
-            onTabSelection(tab)
+            // タブを変更（アニメーションなし）
+            selectedTab = tab
         }) {
             VStack(spacing: 2) {
                 ZStack {
@@ -86,14 +83,12 @@ struct HomeTabBarView: View {
                                 )
                         )
                         .scaleEffect(selectedTab == tab ? 1.05 : 1.0)
-                        .animation(.interpolatingSpring(stiffness: 300, damping: 8), value: selectedTab)
                     
                     // アイコン
                     Image(systemName: tab.iconName)
                         .font(.system(size: tab == .home ? 17 : 15, weight: .medium))
                         .foregroundColor(selectedTab == tab ? .black : AppColors.brightYellow.opacity(0.9))
                         .scaleEffect(selectedTab == tab ? 1.05 : 1.0)
-                        .animation(.interpolatingSpring(stiffness: 400, damping: 10), value: selectedTab)
                 }
                 
                 // ラベル
@@ -102,7 +97,6 @@ struct HomeTabBarView: View {
                     .fontWeight(.medium)
                     .foregroundColor(selectedTab == tab ? AppColors.brightYellow : AppColors.cardWhite.opacity(0.8))
                     .scaleEffect(selectedTab == tab ? 1.02 : 1.0)
-                    .animation(.interpolatingSpring(stiffness: 500, damping: 12), value: selectedTab)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 4)
@@ -113,12 +107,7 @@ struct HomeTabBarView: View {
 
 #Preview {
     @State var selectedTab: HomeTab = .home
-    return HomeTabBarView(
-        selectedTab: $selectedTab,
-        onTabSelection: { tab in
-            print("\(tab.rawValue)タブを選択")
-        }
-    )
-    .background(AppGradients.primaryBackground)
-    .padding()
+    return HomeTabBarView(selectedTab: $selectedTab)
+        .background(AppGradients.primaryBackground)
+        .padding()
 }

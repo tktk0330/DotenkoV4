@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ProfileSectionView: View {
-    @Binding var isAnimating: Bool
     
     var body: some View {
         VStack(spacing: 16) {
@@ -65,8 +64,6 @@ struct ProfileSectionView: View {
                     )
                 )
         }
-        .scaleEffect(isAnimating ? 1.0 : 0.8)
-        .opacity(isAnimating ? 1.0 : 0.0)
     }
     
     // MARK: - プレイヤー名
@@ -86,12 +83,10 @@ struct ProfileSectionView: View {
                         .foregroundColor(.black)
                 )
         }
-        .opacity(isAnimating ? 1.0 : 0.0)
     }
 }
 
 #Preview {
-    @State var isAnimating = true
-    return ProfileSectionView(isAnimating: $isAnimating)
+    ProfileSectionView()
         .background(AppGradients.primaryBackground)
 }

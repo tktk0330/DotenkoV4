@@ -9,7 +9,6 @@ import SwiftUI
 
 struct PlayerCountSelectionView: View {
     @Binding var selectedPlayerCount: Int
-    @Binding var isAnimating: Bool
     
     var body: some View {
         VStack(spacing: 16) {
@@ -22,9 +21,7 @@ struct PlayerCountSelectionView: View {
             }
         }
         .padding(20)
-        .background(backgroundView)
-        .scaleEffect(isAnimating ? 1.0 : 0.9)
-        .opacity(isAnimating ? 1.0 : 0.0)
+        .cardBackground()
     }
     
     // MARK: - ヘッダー
@@ -42,32 +39,6 @@ struct PlayerCountSelectionView: View {
         }
     }
     
-    // MARK: - 背景
-    private var backgroundView: some View {
-        ZStack {
-            // 背景グラデーション
-            RoundedRectangle(cornerRadius: 16)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.black.opacity(0.6),
-                            Color.black.opacity(0.3)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-            
-            // 境界線グラデーション
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(AppGradients.logoGradient, lineWidth: 1.5)
-            
-            // 微かなグロー効果
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(AppColors.brightYellow.opacity(0.2), lineWidth: 3)
-                .blur(radius: 3)
-        }
-    }
     
     // MARK: - プレイヤー数ボタン
     private func playerCountButton(count: Int) -> some View {
@@ -117,10 +88,8 @@ struct PlayerCountSelectionView: View {
 
 #Preview {
     @State var selectedPlayerCount = 3
-    @State var isAnimating = true
     return PlayerCountSelectionView(
-        selectedPlayerCount: $selectedPlayerCount,
-        isAnimating: $isAnimating
+        selectedPlayerCount: $selectedPlayerCount
     )
     .background(AppGradients.primaryBackground)
     .padding()
