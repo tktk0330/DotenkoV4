@@ -161,6 +161,12 @@ struct SplashView: View {
                 print("   - 作成日: \(userProfile.createdAt)")
                 print("   - 最終ログイン: \(userProfile.lastLoginAt)")
                 
+                // プロフィール画像をプリロード
+                await ImageCacheManager.shared.preloadProfileImage(
+                    userId: userProfile.firebaseUID,
+                    iconUrl: userProfile.iconUrl
+                )
+                
                 // メンテナンス情報取得
                 let appStatus = try await appStatusManager.fetchAppStatus()
                 print("✅ スプラッシュ画面: アプリステータス取得完了")

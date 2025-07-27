@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HomeContentView: View {
     @State private var selectedPlayerCount: Int = 3
