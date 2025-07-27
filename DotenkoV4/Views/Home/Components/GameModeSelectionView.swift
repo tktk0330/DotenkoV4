@@ -46,8 +46,7 @@ struct GameModeSelectionView: View {
             }
         }
     }
-}
-    }
+
     
     // MARK: - ゲームモードボタン
     private func gameModeButton(title: String, subtitle: String, iconName: String, iconColor: Color, action: @escaping () -> Void) -> some View {
