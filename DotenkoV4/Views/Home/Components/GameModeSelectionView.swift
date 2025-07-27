@@ -10,31 +10,52 @@ import SwiftUI
 struct GameModeSelectionView: View {
     
     var body: some View {
-        VStack(spacing: 16) {
-            // vs CPU
-            gameModeButton(
-                title: "vs CPU",
-                subtitle: "コンピューターと対戦",
-                iconName: "desktopcomputer",
-                iconColor: .blue,
-                action: {
-                    // CPU対戦画面に遷移
-                    print("CPU対戦を選択")
-                }
-            )
-            
-            // vs Online
-            gameModeButton(
-                title: "vs Online",
-                subtitle: "友人とオンライン対戦",
-                iconName: "wifi",
-                iconColor: .green,
-                action: {
-                    // オンライン対戦画面に遷移
-                    print("オンライン対戦を選択")
-                }
-            )
+// Add this model at the top of the file (below your imports)
+struct GameMode {
+    let title: String
+    let subtitle: String
+    let iconName: String
+    let iconColor: Color
+    let action: () -> Void
+}
+
+struct GameModeSelectionView: View {
+    // ← New stored property
+    let gameModes: [GameMode]
+    
+    // ← New initializer with a default configuration
+    init(gameModes: [GameMode] = Self.defaultGameModes) {
+        self.gameModes = gameModes
+    }
+    
+    // ← Default, data-driven configuration
+    static let defaultGameModes = [
+        GameMode(title: "vs CPU", subtitle: "コンピューターと対戦", iconName: "desktopcomputer", iconColor: .blue) {
+            // CPU対戦画面に遷移
+            print("CPU対戦を選択")
+        },
+        GameMode(title: "vs Online", subtitle: "友人とオンライン対戦", iconName: "wifi", iconColor: .green) {
+            // オンライン対戦画面に遷移
+            print("オンライン対戦を選択")
         }
+    ]
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            // ← Replace the two hard-coded buttons with a ForEach over `gameModes`
+            ForEach(gameModes.indices, id: \.self) { index in
+                let mode = gameModes[index]
+                gameModeButton(
+                    title: mode.title,
+                    subtitle: mode.subtitle,
+                    iconName: mode.iconName,
+                    iconColor: mode.iconColor,
+                    action: mode.action
+                )
+            }
+        }
+    }
+}
     }
     
     // MARK: - ゲームモードボタン
