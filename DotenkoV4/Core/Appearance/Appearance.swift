@@ -180,6 +180,39 @@ struct AppFonts {
         }
     }
     
+    // MARK: - ゴシック系フォント（HOME画面用）
+    static func gothicTitle(_ size: CGFloat) -> Font {
+        if UIFont(name: "Hiragino Sans", size: size) != nil {
+            return .custom("Hiragino Sans", size: size).weight(.bold)
+        } else {
+            return .system(size: size, weight: .bold, design: .default)
+        }
+    }
+    
+    static func gothicHeadline(_ size: CGFloat) -> Font {
+        if UIFont(name: "Hiragino Sans", size: size) != nil {
+            return .custom("Hiragino Sans", size: size).weight(.semibold)
+        } else {
+            return .system(size: size, weight: .semibold, design: .default)
+        }
+    }
+    
+    static func gothicBody(_ size: CGFloat) -> Font {
+        if UIFont(name: "Hiragino Sans", size: size) != nil {
+            return .custom("Hiragino Sans", size: size).weight(.medium)
+        } else {
+            return .system(size: size, weight: .medium, design: .default)
+        }
+    }
+    
+    static func gothicCaption(_ size: CGFloat) -> Font {
+        if UIFont(name: "Hiragino Sans", size: size) != nil {
+            return .custom("Hiragino Sans", size: size).weight(.regular)
+        } else {
+            return .system(size: size, weight: .regular, design: .default)
+        }
+    }
+    
     // MARK: - サイズ定義
     static let titleSize: CGFloat = 32
     static let headlineSize: CGFloat = 24

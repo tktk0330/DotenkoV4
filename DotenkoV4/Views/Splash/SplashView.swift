@@ -14,11 +14,16 @@ struct SplashView: View {
     
     // MARK: - プロパティ
     @EnvironmentObject private var navigationManager: NavigationStateManager // ナビゲーション管理
+    @Environment(\.modelContext) private var modelContext               // SwiftData
+    @StateObject private var authManager = AuthManager.shared           // 認証管理
+    @StateObject private var appStatusManager = AppStatusManager.shared // アプリステータス管理
     @State private var isLoading: Bool = true                           // ローディング状態
     @State private var cardScale: CGFloat = 0.8                         // カードのスケールアニメーション
     @State private var cardOpacity: Double = 0.0                        // カードの透明度アニメーション
     @State private var loadingOpacity: Double = 0.0                     // ローディングテキストの透明度
     @State private var loadingProgress: Double = 0.0                    // ローディング進行度
+    @State private var showErrorPopup: Bool = false                     // エラーポップアップ表示
+    @State private var authError: Error?                                // 認証エラー
     
     // MARK: - ボディ
     var body: some View {
@@ -36,7 +41,25 @@ struct SplashView: View {
         }
         .ignoresSafeArea()
         .onAppear {
+            authManager.setModelContext(modelContext)
             startSplashSequence()
+        }
+        .overlay {
+            // エラーポップアップ
+            if showErrorPopup, let error = authError {
+                ErrorPopupView(
+                    error: error,
+                    retryAction: {
+                        showErrorPopup = false
+                        performInitialization()
+                    },
+                    dismissAction: {
+                        showErrorPopup = false
+                        // エラーでもTOP画面へ遷移（オフラインモード）
+                        navigationManager.push(TopView())
+                    }
+                )
+            }
         }
     }
     
@@ -127,18 +150,62 @@ struct SplashView: View {
     
     // MARK: - 初期化処理
     private func performInitialization() {
-        // 実際の実装では、ここでFirebaseからのデータ取得を行う
-        // 現在はシミュレーション
-        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationConstants.splashDuration) {
-            withAnimation(.easeOut(duration: 0.5)) {
-                isLoading = false
-            }
-            
-            // トップ画面に遷移
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                navigationManager.push(TopView())
+        Task {
+            do {
+                // Firebase匿名認証
+                let userProfile = try await authManager.signInAnonymously()
+                print("✅ スプラッシュ画面: 認証完了")
+                print("   - Firebase UID: \(userProfile.firebaseUID)")
+                print("   - 表示名: \(userProfile.displayName)")
+                print("   - アイコン: \(userProfile.iconName)")
+                print("   - 作成日: \(userProfile.createdAt)")
+                print("   - 最終ログイン: \(userProfile.lastLoginAt)")
+                
+                // メンテナンス情報取得
+                let appStatus = try await appStatusManager.fetchAppStatus()
+                print("✅ スプラッシュ画面: アプリステータス取得完了")
+                
+                // メンテナンス状態チェック
+                if appStatus.maintenanceFlag {
+                    print("🚨 メンテナンスモード: アプリは現在メンテナンス中です")
+                    // TODO: メンテナンス画面に遷移
+                }
+                
+                // バージョンサポート状況チェック
+                if !appStatus.isCurrentVersionSupported(currentVersion: getCurrentAppVersion()) {
+                    print("⚠️ バージョン非対応: アプリのアップデートが必要です")
+                    // TODO: アップデート要求画面に遷移
+                }
+                
+                // 成功時の処理
+                await MainActor.run {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        isLoading = false
+                    }
+                    
+                    // トップ画面に遷移
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        navigationManager.push(TopView())
+                    }
+                }
+                
+            } catch {
+                // エラー時の処理
+                await MainActor.run {
+                    authError = error
+                    showErrorPopup = true
+                    isLoading = false
+                }
             }
         }
+    }
+    
+    // MARK: - ヘルパーメソッド
+    private func getCurrentAppVersion() -> String {
+        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+            return version
+        }
+        return "1.0.0" // デフォルト値
     }
 }
 
