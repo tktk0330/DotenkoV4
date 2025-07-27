@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		5DFF34702E35CD4F009690DC /* Inject in Frameworks */ = {isa = PBXBuildFile; productRef = 5DFF346F2E35CD4F009690DC /* Inject */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		5DB6E2972E35BA47008F953F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5DFF34702E35CD4F009690DC /* Inject in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 				5DB6E2862E35BA46008F953F /* DotenkoV4 */,
 				5DB6E2992E35BA47008F953F /* DotenkoV4Tests */,
 				5DB6E2A32E35BA47008F953F /* DotenkoV4UITests */,
+				5DFF346E2E35CD4F009690DC /* Frameworks */,
 				5DB6E2852E35BA46008F953F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +96,13 @@
 				5DB6E2A02E35BA47008F953F /* DotenkoV4UITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		5DFF346E2E35CD4F009690DC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -112,6 +125,7 @@
 			);
 			name = DotenkoV4;
 			packageProductDependencies = (
+				5DFF346F2E35CD4F009690DC /* Inject */,
 			);
 			productName = DotenkoV4;
 			productReference = 5DB6E2842E35BA46008F953F /* DotenkoV4.app */;
@@ -195,6 +209,9 @@
 			);
 			mainGroup = 5DB6E27B2E35BA46008F953F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5DFF345C2E35C9B0009690DC /* XCRemoteSwiftPackageReference "Inject" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5DB6E2852E35BA46008F953F /* Products */;
 			projectDirPath = "";
@@ -326,6 +343,10 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-interposable",
+				);
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -586,6 +607,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5DFF345C2E35C9B0009690DC /* XCRemoteSwiftPackageReference "Inject" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/krzysztofzablocki/Inject.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5DFF346F2E35CD4F009690DC /* Inject */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5DFF345C2E35C9B0009690DC /* XCRemoteSwiftPackageReference "Inject" */;
+			productName = Inject;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5DB6E27C2E35BA46008F953F /* Project object */;
 }

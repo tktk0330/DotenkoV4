@@ -7,9 +7,15 @@
 
 import SwiftUI
 import SwiftData
+#if DEBUG
+import Inject
+#endif
 
 @main
 struct DotenkoV4App: App {
+    #if DEBUG
+    @ObserveInjection var inject
+    #endif
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
