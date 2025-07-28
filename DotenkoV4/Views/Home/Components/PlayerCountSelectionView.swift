@@ -107,7 +107,7 @@ struct PlayerCountButton: View {
 }
 
 #Preview {
-    @State var selectedPlayerCount = 3
+    @Previewable @State var selectedPlayerCount = 3
     return PlayerCountSelectionView(
         selectedPlayerCount: $selectedPlayerCount
     )
