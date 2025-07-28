@@ -68,7 +68,6 @@ class AppStatusManager: ObservableObject {
     func fetchAppStatus() async throws -> AppStatus {
         isLoading = true
         statusError = nil
-        
         print("🔄 アプリステータス取得開始")
         
         do {

@@ -22,6 +22,7 @@ struct SplashView: View {
     @State private var cardOpacity: Double = 0.0                        // カードの透明度アニメーション
     @State private var loadingOpacity: Double = 0.0                     // ローディングテキストの透明度
     @State private var loadingProgress: Double = 0.0                    // ローディング進行度
+    @State private var isProcessingComplete: Bool = false               // 処理完了状態
     @State private var showErrorPopup: Bool = false                     // エラーポップアップ表示
     @State private var authError: Error?                                // 認証エラー
     
@@ -131,16 +132,22 @@ struct SplashView: View {
         }
         
         // ローディングテキスト表示
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            withAnimation(.easeIn(duration: 0.5)) {
-                loadingOpacity = 1.0
+        Task {
+            try await Task.sleep(for: .milliseconds(500))
+            await MainActor.run {
+                withAnimation(.easeIn(duration: 0.5)) {
+                    loadingOpacity = 1.0
+                }
             }
         }
         
-        // プログレスバーアニメーション
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            withAnimation(.easeInOut(duration: 1.5)) {
-                loadingProgress = 1.0
+        // プログレスバーアニメーション（95%まで）
+        Task {
+            try await Task.sleep(for: .seconds(1))
+            await MainActor.run {
+                withAnimation(.easeInOut(duration: 1.5)) {
+                    loadingProgress = 0.95
+                }
             }
         }
         
@@ -152,8 +159,13 @@ struct SplashView: View {
     private func performInitialization() {
         Task {
             do {
-                // Firebase匿名認証
-                let userProfile = try await authManager.signInAnonymously()
+                // 並列処理で初期化を高速化
+                async let userProfileTask = authManager.signInAnonymously()
+                async let appStatusTask = appStatusManager.fetchAppStatus()
+                
+                // Firebase匿名認証とアプリステータス取得を並列実行
+                let (userProfile, appStatus) = try await (userProfileTask, appStatusTask)
+                
                 print("✅ スプラッシュ画面: 認証完了")
                 print("   - Firebase UID: \(userProfile.firebaseUID)")
                 print("   - 表示名: \(userProfile.displayName)")
@@ -161,31 +173,40 @@ struct SplashView: View {
                 print("   - 作成日: \(userProfile.createdAt)")
                 print("   - 最終ログイン: \(userProfile.lastLoginAt)")
                 
-                // メンテナンス情報取得
-                let appStatus = try await appStatusManager.fetchAppStatus()
+                // プロフィール画像をプリロード
+                await ImageCacheManager.shared.preloadProfileImage(
+                    userId: userProfile.firebaseUID,
+                    iconUrl: userProfile.iconUrl
+                )
+                
                 print("✅ スプラッシュ画面: アプリステータス取得完了")
                 
-                // メンテナンス状態チェック
-                if appStatus.maintenanceFlag {
-                    print("🚨 メンテナンスモード: アプリは現在メンテナンス中です")
-                    // TODO: メンテナンス画面に遷移
-                }
-                
-                // バージョンサポート状況チェック
-                if !appStatus.isCurrentVersionSupported(currentVersion: getCurrentAppVersion()) {
-                    print("⚠️ バージョン非対応: アプリのアップデートが必要です")
-                    // TODO: アップデート要求画面に遷移
-                }
+                // アプリ状態チェック
+                await checkAppStatus(appStatus)
                 
                 // 成功時の処理
                 await MainActor.run {
-                    withAnimation(.easeOut(duration: 0.5)) {
-                        isLoading = false
+                    isProcessingComplete = true
+                    
+                    // プログレスバーを100%まで完了
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        loadingProgress = 1.0
                     }
                     
-                    // トップ画面に遷移
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        navigationManager.push(TopView())
+                    // 完了後すぐに遷移
+                    Task {
+                        try await Task.sleep(for: .milliseconds(300))
+                        await MainActor.run {
+                            withAnimation(.easeOut(duration: 0.5)) {
+                                isLoading = false
+                            }
+                        }
+                        
+                        // トップ画面に遷移
+                        try await Task.sleep(for: .milliseconds(200))
+                        await MainActor.run {
+                            navigationManager.push(TopView())
+                        }
                     }
                 }
                 
@@ -195,12 +216,31 @@ struct SplashView: View {
                     authError = error
                     showErrorPopup = true
                     isLoading = false
+                    
+                    // エラー時もプログレスを95%で停止
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        loadingProgress = 0.95
+                    }
                 }
             }
         }
     }
     
     // MARK: - ヘルパーメソッド
+    private func checkAppStatus(_ appStatus: AppStatus) async {
+        // メンテナンス状態チェック
+        if appStatus.maintenanceFlag {
+            print("🚨 メンテナンスモード: アプリは現在メンテナンス中です")
+            // TODO: メンテナンス画面に遷移
+        }
+        
+        // バージョンサポート状況チェック
+        if !appStatus.isCurrentVersionSupported(currentVersion: getCurrentAppVersion()) {
+            print("⚠️ バージョン非対応: アプリのアップデートが必要です")
+            // TODO: アップデート要求画面に遷移
+        }
+    }
+    
     private func getCurrentAppVersion() -> String {
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
             return version

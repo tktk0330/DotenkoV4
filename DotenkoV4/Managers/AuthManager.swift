@@ -263,4 +263,30 @@ class AuthManager: ObservableObject {
             return try await createUserInFirestore(firebaseUID: firebaseUID, context: context)
         }
     }
+    
+    // MARK: - ユーザープロフィール更新
+    func updateUserProfile(
+        firebaseUID: String,
+        displayName: String,
+        iconUrl: String?
+    ) async throws {
+        print("🔄 ユーザープロフィール更新開始")
+        print("   - Firebase UID: \(firebaseUID)")
+        print("   - 表示名: \(displayName)")
+        print("   - アイコンURL: \(iconUrl ?? "なし")")
+        
+        // Firestoreを更新
+        var updateData: [String: Any] = [
+            "display_name": displayName,
+            "last_login_at": Timestamp(date: Date())
+        ]
+        
+        if let iconUrl = iconUrl {
+            updateData["icon_url"] = iconUrl
+        }
+        
+        try await db.collection("users").document(firebaseUID).updateData(updateData)
+        
+        print("✅ Firestoreプロフィール更新完了")
+    }
 }
