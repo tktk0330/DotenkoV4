@@ -31,9 +31,9 @@ enum HelpSection: String, CaseIterable, Identifiable {
         switch self {
         case .settings:
             return [
-                HelpItem(title: "サウンド設定", icon: "speaker.wave.2.fill", type: .soundSettings),
-                HelpItem(title: "バイブレーション設定", icon: "iphone.radiowaves.left.and.right", type: .vibrationSettings),
-                HelpItem(title: "通知設定", icon: "bell.fill", type: .notificationSettings)
+                HelpItem(title: "SE", icon: "speaker.wave.2.fill", type: .soundEffects),
+                HelpItem(title: "BGM", icon: "music.note", type: .backgroundMusic),
+                HelpItem(title: "バイブレーション", icon: "iphone.radiowaves.left.and.right", type: .vibration)
             ]
         case .rules:
             return [
@@ -68,14 +68,24 @@ struct HelpItem: Identifiable {
     let title: String
     let icon: String
     let type: HelpItemType
+    
+    /// この項目がトグル操作可能かどうか
+    var isTogglable: Bool {
+        switch type {
+        case .soundEffects, .backgroundMusic, .vibration:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 // MARK: - Help項目タイプ
 enum HelpItemType {
-    // 設定
-    case soundSettings
-    case vibrationSettings
-    case notificationSettings
+    // 設定（トグル可能）
+    case soundEffects
+    case backgroundMusic
+    case vibration
     
     // ルール
     case basicRules

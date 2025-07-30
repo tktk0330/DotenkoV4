@@ -13,6 +13,7 @@ struct HelpSectionView: View {
     let onToggle: () -> Void
     let onItemTap: (HelpItem) -> Void
     
+    @StateObject private var appSettings = AppSettings.shared
     @State private var animationRotation: Double = 0
     
     var body: some View {
@@ -56,8 +57,18 @@ struct HelpSectionView: View {
                 if isExpanded {
                     VStack(spacing: 8) {
                         ForEach(section.items) { item in
-                            HelpItemRow(item: item) {
-                                onItemTap(item)
+                            if item.isTogglable {
+                                HelpToggleItemRow(
+                                    item: item,
+                                    isEnabled: getToggleValue(for: item.type),
+                                    onToggle: { value in
+                                        setToggleValue(for: item.type, value: value)
+                                    }
+                                )
+                            } else {
+                                HelpItemRow(item: item) {
+                                    onItemTap(item)
+                                }
                             }
                         }
                     }
@@ -97,6 +108,37 @@ struct HelpSectionView: View {
                     lineWidth: 1
                 )
         )
+    }
+    
+    // MARK: - Toggle Value Management
+    /// 指定したタイプのトグル値を取得
+    private func getToggleValue(for type: HelpItemType) -> Bool {
+        switch type {
+        case .soundEffects:
+            return appSettings.soundEffectsEnabled
+        case .backgroundMusic:
+            return appSettings.backgroundMusicEnabled
+        case .vibration:
+            return appSettings.vibrationEnabled
+        default:
+            return false
+        }
+    }
+    
+    /// 指定したタイプのトグル値を設定
+    private func setToggleValue(for type: HelpItemType, value: Bool) {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        
+        switch type {
+        case .soundEffects:
+            appSettings.soundEffectsEnabled = value
+        case .backgroundMusic:
+            appSettings.backgroundMusicEnabled = value
+        case .vibration:
+            appSettings.vibrationEnabled = value
+        default:
+            break
+        }
     }
 }
 
@@ -174,6 +216,94 @@ struct HelpItemRow: View {
             withAnimation(.easeInOut(duration: 0.1)) {
                 isPressed = pressing
             }
+        }
+    }
+}
+
+// MARK: - Help設定トグル項目行ビュー
+struct HelpToggleItemRow: View {
+    let item: HelpItem
+    let isEnabled: Bool
+    let onToggle: (Bool) -> Void
+    
+    var body: some View {
+        HStack(spacing: 14) {
+            // アイコン
+            Image(systemName: item.icon)
+                .font(.system(size: 18, weight: .medium))
+                .foregroundColor(AppColors.brightYellow)
+                .frame(width: 24)
+            
+            // タイトル
+            Text(item.title)
+                .font(AppFonts.gothicBody(16))
+                .foregroundColor(AppColors.cardWhite)
+            
+            Spacer()
+            
+            // トグルスイッチ
+            Toggle("", isOn: Binding(
+                get: { isEnabled },
+                set: { onToggle($0) }
+            ))
+            .toggleStyle(CustomToggleStyle())
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.black.opacity(0.25),
+                            Color.black.opacity(0.15)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            AppColors.cardWhite.opacity(0.1),
+                            lineWidth: 1
+                        )
+                )
+        )
+    }
+}
+
+// MARK: - カスタムトグルスタイル
+struct CustomToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            configuration.label
+            
+            Button(action: {
+                configuration.isOn.toggle()
+            }) {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        configuration.isOn ?
+                        AnyShapeStyle(AppGradients.logoGradient) :
+                        AnyShapeStyle(Color.black.opacity(0.3))
+                    )
+                    .frame(width: 50, height: 30)
+                    .overlay(
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 26, height: 26)
+                            .offset(x: configuration.isOn ? 10 : -10)
+                            .shadow(
+                                color: Color.black.opacity(0.2),
+                                radius: 3,
+                                x: 0,
+                                y: 1
+                            )
+                    )
+                    .animation(.easeInOut(duration: 0.2), value: configuration.isOn)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
     }
 }

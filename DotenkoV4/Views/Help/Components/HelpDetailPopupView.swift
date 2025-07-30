@@ -110,9 +110,11 @@ struct HelpDetailPopupView: View {
     @ViewBuilder
     private var contentView: some View {
         switch item.type {
-        case .soundSettings:
+        case .soundEffects:
             SoundSettingsView()
-        case .vibrationSettings:
+        case .backgroundMusic:
+            SoundSettingsView()
+        case .vibration:
             VibrationSettingsView()
         case .basicRules:
             BasicRulesView()
@@ -152,7 +154,7 @@ struct HelpDetailPopupView: View {
         item: HelpItem(
             title: "サウンド設定",
             icon: "speaker.wave.2.fill",
-            type: .soundSettings
+            type: .soundEffects
         ),
         isPresented: $isPresented
     )
