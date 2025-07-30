@@ -7,7 +7,10 @@
 
 import SwiftUI
 
+/// ゲーム設定項目を表示するカードコンポーネント
+/// タップで設定変更モーダルを表示する
 struct GameSettingCard: View {
+    // MARK: - Properties
     let setting: GameSettingType
     let currentValue: Int
     let displayValue: String
@@ -15,46 +18,13 @@ struct GameSettingCard: View {
     
     @State private var isPressed = false
     
+    // MARK: - Body
     var body: some View {
-        Button(action: {
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            onTap()
-        }) {
+        Button(action: handleTap) {
             VStack(spacing: 16) {
-                // アイコン
-                Image(systemName: setting.icon)
-                    .font(.system(size: 32, weight: .medium))
-                    .foregroundStyle(AppGradients.logoGradient)
-                    .frame(width: 60, height: 60)
-                    .background(
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        AppColors.brightYellow.opacity(0.2),
-                                        AppColors.brightYellow.opacity(0.1)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    )
-                
-                // タイトル
-                Text(setting.rawValue)
-                    .font(AppFonts.gothicBody(16))
-                    .fontWeight(.medium)
-                    .foregroundColor(AppColors.cardWhite)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                
-                // 現在の値
-                Text(displayValue)
-                    .font(AppFonts.gothicHeadline(28))
-                    .fontWeight(.bold)
-                    .foregroundStyle(AppGradients.logoGradient)
-                    .minimumScaleFactor(0.7)
-                    .lineLimit(1)
+                iconSection
+                titleSection
+                valueSection
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 20)
@@ -78,7 +48,59 @@ struct GameSettingCard: View {
         }
     }
     
+    // MARK: - Icon Section
+    private var iconSection: some View {
+        Image(systemName: setting.icon)
+            .font(.system(size: 32, weight: .medium))
+            .foregroundStyle(AppGradients.logoGradient)
+            .frame(width: 60, height: 60)
+            .background(iconBackground)
+    }
+    
+    /// アイコンの背景グラデーション
+    private var iconBackground: some View {
+        Circle()
+            .fill(
+                LinearGradient(
+                    colors: [
+                        AppColors.brightYellow.opacity(0.2),
+                        AppColors.brightYellow.opacity(0.1)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+    }
+    
+    // MARK: - Title Section
+    private var titleSection: some View {
+        Text(setting.rawValue)
+            .font(AppFonts.gothicBody(16))
+            .fontWeight(.medium)
+            .foregroundColor(AppColors.cardWhite)
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+    }
+    
+    // MARK: - Value Section
+    private var valueSection: some View {
+        Text(displayValue)
+            .font(AppFonts.gothicHeadline(28))
+            .fontWeight(.bold)
+            .foregroundStyle(AppGradients.logoGradient)
+            .minimumScaleFactor(0.7)
+            .lineLimit(1)
+    }
+    
+    // MARK: - Card Background
     private var cardBackground: some View {
+        baseGradient
+            .overlay(borderGradient)
+            .overlay(overlayBorder)
+    }
+    
+    /// カードのベースグラデーション
+    private var baseGradient: some View {
         LinearGradient(
             colors: [
                 Color.black.opacity(0.4),
@@ -88,28 +110,39 @@ struct GameSettingCard: View {
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(
-                    LinearGradient(
-                        colors: [
-                            AppColors.brightYellow.opacity(isPressed ? 0.6 : 0.3),
-                            AppColors.vibrantOrange.opacity(isPressed ? 0.4 : 0.2)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: isPressed ? 2 : 1
-                )
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(
-                    Color.white.opacity(isPressed ? 0.3 : 0.1),
-                    lineWidth: 0.5
-                )
-                .blendMode(.overlay)
-        )
+    }
+    
+    /// カードのボーダーグラデーション
+    private var borderGradient: some View {
+        RoundedRectangle(cornerRadius: 20)
+            .stroke(
+                LinearGradient(
+                    colors: [
+                        AppColors.brightYellow.opacity(isPressed ? 0.6 : 0.3),
+                        AppColors.vibrantOrange.opacity(isPressed ? 0.4 : 0.2)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                lineWidth: isPressed ? 2 : 1
+            )
+    }
+    
+    /// カードのオーバーレイボーダー
+    private var overlayBorder: some View {
+        RoundedRectangle(cornerRadius: 20)
+            .stroke(
+                Color.white.opacity(isPressed ? 0.3 : 0.1),
+                lineWidth: 0.5
+            )
+            .blendMode(.overlay)
+    }
+    
+    // MARK: - Actions
+    /// カードタップ時の処理
+    private func handleTap() {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        onTap()
     }
 }
 
