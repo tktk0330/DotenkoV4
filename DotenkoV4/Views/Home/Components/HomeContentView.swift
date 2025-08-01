@@ -27,7 +27,7 @@ struct HomeContentView: View {
                 )
                 
                 // ゲームモード選択
-                GameModeSelectionView()
+                GameModeSelectionView(selectedPlayerCount: $selectedPlayerCount)
                 
                 // 下部スペース
                 Spacer()

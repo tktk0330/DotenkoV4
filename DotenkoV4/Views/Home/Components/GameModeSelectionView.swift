@@ -18,19 +18,37 @@ struct GameMode {
 
 struct GameModeSelectionView: View {
     let gameModes: [GameMode]
+    @Binding var selectedPlayerCount: Int
+    @EnvironmentObject private var navigationManager: NavigationStateManager
+    @State private var selectedGameMode: String = ""
     
-    init(gameModes: [GameMode] = Self.defaultGameModes) {
-        self.gameModes = gameModes
+    init(selectedPlayerCount: Binding<Int>, gameModes: [GameMode]? = nil) {
+        self._selectedPlayerCount = selectedPlayerCount
+        
+        if let customGameModes = gameModes {
+            self.gameModes = customGameModes
+        } else {
+            self.gameModes = [
+                GameMode(title: "vs CPU", subtitle: "コンピューターと対戦", iconName: "desktopcomputer", iconColor: .blue) {
+                    // アクションは後でセットアップ
+                },
+                GameMode(title: "vs Online", subtitle: "友人とオンライン対戦", iconName: "wifi", iconColor: .green) {
+                    print("オンライン対戦は Phase 2 で実装予定")
+                }
+            ]
+        }
     }
     
-    static let defaultGameModes = [
-        GameMode(title: "vs CPU", subtitle: "コンピューターと対戦", iconName: "desktopcomputer", iconColor: .blue) {
-            print("CPU対戦を選択")
-        },
-        GameMode(title: "vs Online", subtitle: "友人とオンライン対戦", iconName: "wifi", iconColor: .green) {
-            print("オンライン対戦を選択")
-        }
-    ]
+    // MARK: - アクション
+    private func showVsCPUMatching() {
+        selectedGameMode = "vs CPU"
+        let matchingInfo = createMatchingInfo()
+        navigationManager.push(MatchingView(matchingInfo: matchingInfo))
+    }
+    
+    private func showVsOnlineNotice() {
+        print("オンライン対戦は Phase 2 で実装予定")
+    }
     
     var body: some View {
         VStack(spacing: 16) {
@@ -41,10 +59,24 @@ struct GameModeSelectionView: View {
                     subtitle: mode.subtitle,
                     iconName: mode.iconName,
                     iconColor: mode.iconColor,
-                    action: mode.action
+                    action: {
+                        if mode.title == "vs CPU" {
+                            showVsCPUMatching()
+                        } else {
+                            mode.action()
+                        }
+                    }
                 )
             }
         }
+    }
+    
+    // MARK: - ヘルパーメソッド
+    private func createMatchingInfo() -> MatchingInfo {
+        return MatchingInfo.defaultInfo(
+            gameMode: selectedGameMode,
+            playerCount: selectedPlayerCount
+        )
     }
 
     
@@ -135,7 +167,8 @@ struct GameModeSelectionView: View {
 }
 
 #Preview {
-    GameModeSelectionView()
+    @Previewable @State var selectedPlayerCount = 3
+    return GameModeSelectionView(selectedPlayerCount: $selectedPlayerCount)
         .background(AppGradients.primaryBackground)
         .padding()
 }
