@@ -27,10 +27,13 @@ struct HelpContentView: View {
                             isExpanded: expandedSections.contains(section),
                             onToggle: { toggleSection(section) },
                             onItemTap: { item in
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                selectedItem = item
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    showingPopup = true
+                                // トグル項目でない場合のみポップアップを表示
+                                if !item.isTogglable {
+                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    selectedItem = item
+                                    withAnimation(.easeOut(duration: 0.3)) {
+                                        showingPopup = true
+                                    }
                                 }
                             }
                         )
